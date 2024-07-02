@@ -43,7 +43,9 @@ namespace JWTWeb_API.Controllers
                 return BadRequest("Wrong Passwords");
             }
 
-            return Ok(user);
+            string Token = CreateToken(user);
+
+            return Ok(Token);
         }
 
         private string CreateToken(User user)
@@ -53,19 +55,22 @@ namespace JWTWeb_API.Controllers
                 new Claim(ClaimTypes.Name, user.UserName)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSetting:Token").Value!
-                ));
+            var keyString = _configuration.GetSection("AppSetting:Token").Value!;
+            if (keyString.Length < 32) // Ensure the key is at least 32 bytes long
+            {
+                keyString = keyString.PadRight(32, '0');
+            }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
 
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
             var Token = new JwtSecurityToken(
                 claims: claims,
-                expires:DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddDays(1),
                 signingCredentials: cred
                 );
 
-            var jwt= new JwtSecurityTokenHandler().WriteToken(Token);
+            var jwt = new JwtSecurityTokenHandler().WriteToken(Token);
 
             return jwt;
         }
