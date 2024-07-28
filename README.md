@@ -16,7 +16,7 @@ Clone the repository:
 
 bash
 Copy code
-git clone https://github.com/yourusername/JWTWeb_API.git
+git clone https://github.com/maduradevDotNet/JWTWeb_API.git
 Navigate to the project directory:
 
 bash
